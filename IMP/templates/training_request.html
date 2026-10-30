@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}
+Training Request
+{% endblock %}
+
+{% block page_title %}
+Training Request
+{% endblock %}
+
+{% block page_subtitle %}
+Submit a training request
+{% endblock %}
+
+{% block content %}
+<br>
+<br>
+<br>
+<div class="card">
+
+    <div class="card-header">
+
+        Training Request
+
+    </div>
+
+    <div class="card-body">
+
+        <form method="post" action="/training/request/{{ training[0] }}">
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Training
+                </label>
+
+                <input type="text" class="form-control" value="{{ training[1] }}" readonly>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Description
+                </label>
+
+                <textarea class="form-control" rows="3" readonly>{{ training[2] }}</textarea>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Cost
+                </label>
+
+                <input type="text" class="form-control" value="£{{ training[3] }}" readonly>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Name
+                </label>
+
+                <input type="text" name="requester_name" class="form-control" required>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Email
+                </label>
+
+                <input type="email" name="requester_email" class="form-control" required>
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Comments
+                </label>
+
+                <textarea name="comments" rows="5" class="form-control"></textarea>
+
+            </div>
+
+            <button type="submit" class="btn btn-warning">
+
+                Submit Request
+
+            </button>
+
+            <a href="/training" class="btn btn-secondary">
+
+                Cancel
+
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

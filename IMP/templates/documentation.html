@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+Documentation
+{% endblock %}
+
+{% block page_title %}
+Documentation
+{% endblock %}
+
+{% block page_subtitle %}
+Browse and download IMP documentation
+{% endblock %}
+
+{% block content %}
+<br><br><br>
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <strong>Available Documentation</strong>
+        <a href="/documentation/upload" class="btn btn-warning">
+            Upload Document
+        </a>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Uploaded By</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                <tr>
+                    <td>{{ document[1] }}</td>
+                    <td>{{ document[2] }}</td>
+                    <td>{{ document[3] }}</td>
+                    <td>
+                        <a href="/download-document?file_path={{ document[4] }}">
+                            Download
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
