@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IMP | Create Extension</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .container {
+            max-width: 1000px;
+        }
+
+        .card {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
+            border-radius: 8px;
+        }
+
+        .btn-warning {
+            background-color: #F5A81D;
+            border-color: #F5A81D;
+            color: rgb(44, 39, 39);
+            font-weight: bold;
+        }
+
+        .btn-warning:hover {
+            background-color: #F5A81D;
+            border-color: #F5A81D;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="text-center">
+            <img src="/static/images/Logo.png" class="img-fluid" style="max-width:400px;" alt="Logo">
+        </div>
+        <a href="javascript:history.back()" class="btn btn-secondary mt-4">
+            Back
+        </a>
+        <div class="card mt-4">
+            <div class="card-header">
+                <strong>
+                    Create Extension
+                </strong>
+            </div>
+            <div class="card-body">
+                <form action="/extensions/create" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Extension Code
+                        </label>
+                        <input id="extension_code" type="text" class="form-control" value="Generated Automatically"
+                            readonly>
+                        <div class="form-text">
+                            IMP will automatically generate the extension code based on Scope and Category.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Extension Name
+                        </label>
+                        <input type="text" name="rollout_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Scope
+                        </label>
+                        <select id="scope" name="scope" class="form-select" required>
+                            <option value="">
+                                Select Scope
+                            </option>
+                            {% for scope in scopes %}
+                            <option value={{scope[0]}}>
+                                {{scope[0]}} - {{scope[1]}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Category
+                        </label>
+                        <select id="category" name="category_id" class="form-select" required>
+                            <option value="">
+                                Select Category
+                            </option>
+                            {% for category in categories %}
+                            <option value="{{ category[0] }}">
+                                {{ category[2] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Description
+                        </label>
+                        <textarea name="description" rows="5" class="form-control"></textarea>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" checked name="active">
+                        <label class="form-check-label">
+                            Active
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        Create Extension
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        async function generateCode() {
+
+            const scope =
+                document.getElementById("scope").value;
+
+            const category =
+                document.getElementById("category").value;
+
+            if (!scope || !category) {
+                return;
+            }
+
+            const response =
+                await fetch(
+                    `/api/next-extension-number?scope=${scope}&category_id=${category}`
+                );
+
+            const data =
+                await response.json();
+
+            document.getElementById("extension_code").value =
+                data.code;
+        }
+
+        document
+            .getElementById("scope")
+            .addEventListener("change", generateCode);
+
+        document
+            .getElementById("category")
+            .addEventListener("change", generateCode);
+
+    </script>
+</body>
+
+</html>

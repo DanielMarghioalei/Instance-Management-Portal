@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>IMP | Search Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', path='images/IMP_favourite_icon.png') }}">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            margin: 0;
+        }
+
+        .header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f4f6f9;
+            z-index: 1000;
+            border-bottom: 1px solid #d3d3d3;
+        }
+
+        .results-container {
+            margin-top: 320px;
+            margin-bottom: 90px;
+        }
+
+        .footer-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f4f6f9;
+            border-top: 1px solid #d3d3d3;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .card {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 1300px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-fixed">
+        <div class="container text-center mt-5">
+            <ul class="list-group">
+                <li class="list-group-item border-0 bg-transparent text-center">
+                    <img src="/static/images/Logo.png" class="img-fluid" style="max-width: 400px;" alt="Logo">
+                </li>
+                <br>
+                <a href="javascript:history.back()" class="btn btn-secondary mb-3" style="width: 5%;">Back</a>
+                <h1 style="text-align: left;">Search Results</h1>
+            </ul>
+        </div>
+    </div>
+    <div class="container results-container">
+        {% if results %}
+        {% for row in results %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>
+                                    <a href="/stack/{{ row[0] }}">
+                                        {{ row[1] }}
+                                    </a>
+                                </h4>
+                                <p>
+                                    <strong></strong><br>
+                                    <strong>City:</strong>
+                                    {{ row[3] }}
+                                    <br>
+                                    <strong>Customer:</strong>
+                                    {{ row[2] }}
+                                    <br>
+                                    <strong>Version:</strong>
+                                    {{ row[4] }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>
+                                    Contacts
+                                </h4>
+                                <p>
+                                    <strong>Facility Admin:</strong>
+                                    {{ row[5] }}
+                                    <br>
+                                    <strong>IT Site Support:</strong>
+                                    {{ row[6] }}
+                                    <br>
+                                    <strong>Service Desk:</strong>
+                                    {{ row[7] }}
+                                    <br>
+                                    <strong>IT Escalations:</strong>
+                                    {{ row[8] }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="alert alert-warning">
+            No results found
+        </div>
+        {% endif %}
+
+    </div>
+    <footer class="footer-fixed">
+        <small>
+            Built for BY WMS Discrete
+        </small>
+        <br>
+        <small>
+            Need assistance?
+            <a
+                href="mailto:service_desk@yourcompany.com?subject=IMP Support Request&body=Hi Team,%0D%0A%0D%0AI need assistance with IMP.%0D%0A%0D%0AIssue Description:%0D%0A%0D%0A%0D%0AEnvironment:%0D%0A%0D%0AFacility:%0D%0A%0D%0ASteps Taken:%0D">
+                Contact Service Desk
+            </a>
+        </small>
+    </footer>
+</body>
+
+</html>
