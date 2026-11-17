@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>IMP | Create Extension</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .container {
+            max-width: 1000px;
+        }
+
+        .card {
+            border: 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
+        }
+
+        .btn-warning {
+            background-color: #F5A81D;
+            border-color: #F5A81D;
+            color: rgb(44, 39, 39);
+            font-weight: bold;
+        }
+
+        .btn-warning:hover {
+            background-color: #dc9210;
+            border-color: #dc9210;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container my-5">
+
+        <div class="text-center">
+            <img src="/static/images/Logo.png" class="img-fluid" style="max-width: 400px;" alt="Metro Logo">
+        </div>
+
+        <a href="javascript:history.back()" class="btn btn-secondary mt-4">
+            Back
+        </a>
+
+        <div class="card mt-4">
+
+            <div class="card-header bg-white py-3">
+                <strong>Create Extension</strong>
+            </div>
+
+            <div class="card-body p-4">
+
+                <div class="alert alert-info">
+                    Enter the extension details below. After the
+                    extension has been created, you will be taken
+                    to the version screen to upload the files for
+                    the first version.
+                </div>
+
+                <form id="extensionForm" action="/extensions/create" method="post">
+
+                    <div class="mb-3">
+                        <label for="extension_code" class="form-label">
+                            Extension Code
+                        </label>
+
+                        <input id="extension_code" type="text" class="form-control" value="Generated Automatically"
+                            readonly>
+
+                        <div class="form-text">
+                            Generated from the selected scope,
+                            category and next available sequence.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rollout_name" class="form-label">
+                            Short Description
+                        </label>
+
+                        <input id="rollout_name" type="text" name="rollout_name" class="form-control" maxlength="200"
+                            placeholder="Example: Add new pallet identification label" required>
+
+                        <div class="form-text">
+                            Enter a short, recognisable summary of
+                            the extension. The extension code will
+                            remain the primary identifier.
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label for="scope" class="form-label">
+                                Scope
+                            </label>
+
+                            <select id="scope" name="scope" class="form-select" required>
+                                <option value="">
+                                    Select Scope
+                                </option>
+
+                                {% for scope in scopes %}
+                                <option value="{{ scope[0] }}">
+                                    {{ scope[0] }} - {{ scope[1] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label for="category" class="form-label">
+                                Category
+                            </label>
+
+                            <select id="category" name="category_id" class="form-select" required>
+                                <option value="">
+                                    Select Category
+                                </option>
+
+                                {% for category in categories %}
+                                <option value="{{ category[0] }}">
+                                    {{ category[2] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label for="description" class="form-label">
+                            Detailed Description
+                        </label>
+
+                        <textarea id="description" name="description" rows="5" class="form-control"
+                            placeholder="Describe the purpose, business requirement and expected behaviour of the extension."></textarea>
+
+                        <div class="form-text">
+                            Optional. Include enough detail for
+                            another analyst to understand why the
+                            extension exists.
+                        </div>
+
+                    </div>
+
+                    <div class="form-check mb-4">
+
+                        <input id="active" class="form-check-input" type="checkbox" name="active" checked>
+
+                        <label for="active" class="form-check-label">
+                            Active
+                        </label>
+
+                    </div>
+
+                    <button id="submitButton" type="submit" class="btn btn-warning">
+                        Create Extension and Continue
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const scopeInput =
+            document.getElementById("scope");
+
+        const categoryInput =
+            document.getElementById("category");
+
+        const extensionCodeInput =
+            document.getElementById("extension_code");
+
+        const extensionForm =
+            document.getElementById("extensionForm");
+
+        const submitButton =
+            document.getElementById("submitButton");
+
+
+        async function generateCode() {
+
+            const scope = scopeInput.value;
+            const category = categoryInput.value;
+
+            if (!scope || !category) {
+                extensionCodeInput.value =
+                    "Generated Automatically";
+
+                return;
+            }
+
+            try {
+
+                const query =
+                    new URLSearchParams({
+                        scope: scope,
+                        category_id: category
+                    });
+
+                const response = await fetch(
+                    `/api/next-extension-number?${query.toString()}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Unable to generate extension code."
+                    );
+                }
+
+                const data = await response.json();
+
+                extensionCodeInput.value = data.code;
+
+            } catch (error) {
+
+                console.error(
+                    "Extension code preview failed:",
+                    error
+                );
+
+                extensionCodeInput.value =
+                    "Unable to generate preview";
+            }
+        }
+
+
+        scopeInput.addEventListener(
+            "change",
+            generateCode
+        );
+
+        categoryInput.addEventListener(
+            "change",
+            generateCode
+        );
+
+
+        extensionForm.addEventListener(
+            "submit",
+            function () {
+
+                submitButton.disabled = true;
+
+                submitButton.textContent =
+                    "Creating Extension...";
+            }
+        );
+    </script>
+
+</body>
+
+</html>

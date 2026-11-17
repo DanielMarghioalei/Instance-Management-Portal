@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}WMS Reporting Job Builder{% endblock %}
+
+{% block content %}
+
+<form method="post" action="/report-jobs/generate">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>WMS Reporting Job Builder</h2>
+                <small class="text-muted">
+                    Generate Reporting Jobs, POLDAT Inserts and Job Definitions
+                </small>
+            </div>
+            <a href="/" class="btn btn-secondary">
+                ← Back
+            </a>
+        </div>
+        <div class="row">
+            <div class="col-lg-9">
+                <!-- JOB DETAILS -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Job Details
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>Scope</label>
+                                <input id="scope" name="scope" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Action</label>
+                                <input id="action" name="action" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Recipient Type</label>
+                                <select id="recipient_type" name="recipient_type" class="form-select">
+                                    <option value="INTERNAL">
+                                        INTERNAL
+                                    </option>
+                                    <option value="EXTERNAL">
+                                        EXTERNAL
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Specifics</label>
+                                <input id="specifics" name="specifics" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Generated Job ID</label>
+                                <input id="job_id" name="job_id" readonly class="form-control bg-light fw-bold">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Job Name</label>
+                                <input id="job_name" name="job_name" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- SCHEDULE -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Schedule
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="radio" checked name="schedule_type" value="CRON">
+                            Cron
+                            &nbsp;&nbsp;
+                            <input type="radio" name="schedule_type" value="TIMER">
+                            Timer
+                        </div>
+                        <div id="cron_section">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>Frequency</label>
+                                    <select id="cron_type" class="form-select">
+                                        <option value="DAILY">Daily</option>
+                                        <option value="WEEKLY">Weekly</option>
+                                        <option value="MONTHLY">Monthly</option>
+                                        <option value="MINUTES">Every X Minutes</option>
+                                        <option value="HOURS">Every X Hours</option>
+                                        <option value="CUSTOM">Custom</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label>
+                                    Cron
+                                </label>
+                                <input id="generated_cron" name="generated_cron" class="form-control bg-light">
+                            </div>
+                        </div>
+                        <div id="timer_section" style="display:none;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Timer Seconds</label>
+                                    <input type="number" id="timer_seconds" name="timer_seconds" value="300"
+                                        class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- EMAIL -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Email Settings
+                    </div>
+                    <div class="card-body">
+                        <label>
+                            Instance
+                        </label>
+                        <input list="instance_list" id="instance_name" name="instance_name" class="form-control">
+                        <datalist id="instance_list">
+                            {% for instance in instances %}
+                            <option value="{{ instance[0] }}">
+                                {% endfor %}
+                        </datalist>
+                        <div class="mt-3">
+                            <label>
+                                Sender Email
+                            </label>
+                            <input id="sender_email" name="sender_email" class="form-control">
+                        </div>
+                        <div class="mt-3">
+                            <label>
+                                Subject
+                            </label>
+                            <input id="email_subject" name="email_subject" class="form-control">
+                        </div>
+                        <div class="mt-3">
+                            <label>
+                                Message
+                            </label>
+                            <textarea rows="4" id="email_message" name="email_message" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- ATTACHMENTS -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between">
+                        <span>
+                            Attachments
+                        </span>
+                        <button type="button" onclick="addAttachment()" class="btn btn-success btn-sm">
+                            + Add Attachment
+                        </button>
+                    </div>
+                    <div class="card-body" id="attachments_container"></div>
+                </div>
+                <!-- RECIPIENTS -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between">
+                        <span>
+                            Recipients
+                        </span>
+                        <button type="button" onclick="addRecipient()" class="btn btn-success btn-sm">
+                            + Add Recipient
+                        </button>
+                    </div>
+                    <div class="card-body" id="recipients_container"></div>
+                </div>
+                <div class="text-end">
+                    <button id="generate_button" disabled type="submit" class="btn btn-primary btn-lg">
+                        Generate Job
+                    </button>
+                </div>
+            </div>
+            <!-- SUMMARY -->
+            <div class="col-lg-3">
+                <div class="card sticky-top">
+                    <div class="card-header">
+                        Summary
+                    </div>
+                    <div class="card-body">
+                        <strong>Job ID</strong>
+                        <div id="summary_job_id">-</div>
+                        <hr>
+                        <strong>Attachments</strong>
+                        <div id="summary_attachments">
+                            0
+                        </div>
+                        <hr>
+                        <strong>Recipients</strong>
+                        <div id="summary_recipients">
+                            0
+                        </div>
+                        <hr>
+                        <strong>Status</strong>
+                        <div id="summary_status">
+                            Incomplete
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+
+    let attachmentCount = 0;
+
+    function generateJobId() {
+
+        let jobId =
+            document.getElementById("scope").value +
+            "-" +
+            document.getElementById("action").value +
+            "-" +
+            document.getElementById("recipient_type").value +
+            "-" +
+            document.getElementById("specifics").value;
+
+        jobId = jobId.toUpperCase();
+
+        if (jobId.length > 50) {
+            jobId = jobId.substring(0, 50);
+        }
+
+        document.getElementById("job_id").value = jobId;
+        document.getElementById("summary_job_id").innerText = jobId;
+
+        updateSummary();
+    }
+
+    function addAttachment() {
+
+        if (attachmentCount >= 6) {
+            alert("Maximum 6 attachments");
+            return;
+        }
+
+        attachmentCount++;
+
+        document.getElementById(
+            "attachments_container"
+        ).insertAdjacentHTML(
+            "beforeend",
+            `
+        <div class="attachment-card border rounded p-3 mb-3">
+
+            <div class="d-flex justify-content-between">
+
+                <h6>Attachment</h6>
+
+                <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    onclick="this.closest('.attachment-card').remove();updateSummary();">
+
+                    Remove
+
+                </button>
+
+            </div>
+
+            <input
+                name="file_name"
+                class="form-control mb-2"
+                placeholder="report.csv">
+
+            <textarea
+                name="sql_text"
+                rows="10"
+                class="form-control"
+                placeholder="SQL"></textarea>
+
+        </div>
+        `
+        );
+
+        updateSummary();
+    }
+
+    function addRecipient() {
+
+        document.getElementById(
+            "recipients_container"
+        ).insertAdjacentHTML(
+            "beforeend",
+            `
+        <div class="recipient-card border rounded p-3 mb-3">
+
+            <div class="d-flex justify-content-between">
+
+                <h6>Recipient</h6>
+
+                <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    onclick="this.closest('.recipient-card').remove();updateSummary();">
+
+                    Remove
+
+                </button>
+
+            </div>
+
+            <input
+                name="recipient_email"
+                class="form-control recipient-email">
+
+            <div class="validation-badge mt-2"></div>
+
+        </div>
+        `
+        );
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+
+        let attachments =
+            document.querySelectorAll(
+                ".attachment-card"
+            ).length;
+
+        let recipients =
+            document.querySelectorAll(
+                ".recipient-card"
+            ).length;
+
+        document.getElementById(
+            "summary_attachments"
+        ).innerText = attachments;
+
+        document.getElementById(
+            "summary_recipients"
+        ).innerText = recipients;
+
+        let valid =
+            document.getElementById(
+                "job_name"
+            ).value.trim().length > 0 &&
+            attachments > 0 &&
+            recipients > 0;
+
+        document.getElementById(
+            "generate_button"
+        ).disabled = !valid;
+
+        document.getElementById(
+            "summary_status"
+        ).innerText = valid
+                ? "Ready"
+                : "Incomplete";
+    }
+    document.getElementById(
+        "scope"
+    ).addEventListener(
+        "keyup",
+        generateJobId
+    );
+    document.getElementById(
+        "action"
+    ).addEventListener(
+        "keyup",
+        generateJobId
+    );
+    document.getElementById(
+        "specifics"
+    ).addEventListener(
+        "keyup",
+        generateJobId
+    );
+    document.getElementById(
+        "recipient_type"
+    ).addEventListener(
+        "change",
+        generateJobId
+    );
+    document.getElementById(
+        "job_name"
+    ).addEventListener(
+        "keyup",
+        updateSummary
+    );
+</script>
+{% endblock %}
